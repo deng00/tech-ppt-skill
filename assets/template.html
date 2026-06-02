@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>[必填] 替换为 deck 标题 · Tech Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ===== 主题色：默认 克莱因蓝 IKB。换安全橙：把 --accent 改 #FF5800，--accent-ink 保持 #fff ===== */
+    --accent:#002FA7;
+    --accent-ink:#ffffff;        /* accent 底上的字 */
+    --accent-tint:#eaeefb;       /* accent 极浅底（高亮单元格/标记） */
+
+    --paper:#ffffff;             /* 主底：纸白 */
+    --ink:#0a0a0a;               /* 主字：近黑 */
+    --ink-2:#3d3d3d;             /* 次级字 */
+    --ink-3:#737373;             /* 辅助字 / 标签 */
+    --ink-4:#a3a3a3;             /* 占位 / 极弱 */
+    --line:#e2e2e2;              /* hairline 分隔线 */
+    --line-strong:#0a0a0a;       /* 强分隔（标题下粗线） */
+    --grey-bg:#f4f4f4;           /* 浅灰块底 */
+
+    /* dark 页反相（用于节奏，不要超过 2 页） */
+    --dk-paper:#0a0a0a;
+    --dk-ink:#ffffff;
+    --dk-ink-3:#9a9a9a;
+    --dk-line:#2a2a2a;
+    --dk-grey-bg:#171717;
+
+    /* 全程等宽（技术风强制）：英文/数字 Ubuntu Mono；中文 Ubuntu Mono 不含字形，回退等宽友好的 CJK / 系统中文 */
+    --mono:"Ubuntu Mono","JetBrains Mono","SF Mono","Sarasa Mono SC","Noto Sans Mono CJK SC","Noto Sans SC","PingFang SC","Microsoft YaHei",ui-monospace,monospace;
+    --sans:var(--mono);   /* 模板内所有 var(--sans) 引用一并等宽，无需逐处改 */
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  /* 整体随视口等比缩放：所有尺寸用 rem，降低不同屏的溢出风险 */
+  html{font-size:clamp(12px, 0.62vw + 0.52vh, 17px); scroll-behavior:auto;}
+  html, body{height:100%;}
+  body{
+    font-family:var(--sans);
+    background:var(--paper); color:var(--ink);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    font-feature-settings:"tnum","ss01";
+  }
+
+  /* ===== 纵向 scroll-snap deck：每页 100vh，锚点原生定位，零动效 ===== */
+  .deck{ scroll-snap-type:y mandatory; }
+  .page{
+    position:relative;
+    height:100vh; width:100%;
+    scroll-snap-align:start;
+    overflow:hidden;                 /* 内容必须在一屏内，超出即视为 bug */
+    padding:5.2vh 5vw 4.4vh;
+    display:flex; flex-direction:column;
+    background:var(--paper); color:var(--ink);
+    border-bottom:1px solid var(--line);
+  }
+  .page.dark{
+    background:var(--dk-paper); color:var(--dk-ink);
+    --ink:var(--dk-ink); --ink-2:#d4d4d4; --ink-3:var(--dk-ink-3);
+    --line:var(--dk-line); --line-strong:var(--dk-ink); --grey-bg:var(--dk-grey-bg);
+  }
+
+  /* ===== 页眉：页码 · 标题 · #锚点名 ===== */
+  .page-head{ display:flex; align-items:flex-end; justify-content:space-between;
+    gap:1.5rem; padding-bottom:.7rem; border-bottom:2px solid var(--line-strong); }
+  .ph-l{ display:flex; align-items:baseline; gap:1rem; min-width:0; }
+  .ph-num{ font-family:var(--mono); font-weight:700; font-size:1.05rem; color:var(--accent); letter-spacing:.04em; }
+  .ph-title{ font-weight:800; font-size:1.7rem; line-height:1.05; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ph-anchor{ font-family:var(--mono); font-size:.72rem; color:var(--ink-3); letter-spacing:.04em; white-space:nowrap; }
+  .ph-anchor b{ color:var(--accent); font-weight:600; }
+
+  /* 副标题行（页眉下方一句话定位本页） */
+  .page-sub{ margin-top:.7rem; font-size:.96rem; line-height:1.45; color:var(--ink-2); max-width:62ch; }
+
+  /* ===== 页主体：可填密集网格 ===== */
+  .page-body{ flex:1; min-height:0; margin-top:1.4rem; display:flex; flex-direction:column; }
+
+  /* 12 列网格 */
+  .grid{ display:grid; grid-template-columns:repeat(12,1fr); gap:1rem 1.4rem; }
+  .grid.rows-fill{ flex:1; align-content:stretch; }
+  .c1{grid-column:span 1}.c2{grid-column:span 2}.c3{grid-column:span 3}.c4{grid-column:span 4}
+  .c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}
+  .c9{grid-column:span 9}.c10{grid-column:span 10}.c11{grid-column:span 11}.c12{grid-column:span 12}
+
+  /* ===== 排版原子 ===== */
+  .kicker{ font-family:var(--mono); font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-3); }
+  .mono{ font-family:var(--mono); }
+  .h-sec{ font-weight:700; font-size:1.05rem; letter-spacing:-.005em; display:flex; align-items:center; gap:.5rem; }
+  .h-sec::before{ content:""; width:.55rem; height:.55rem; background:var(--accent); flex:0 0 auto; } /* 直角方块标记 */
+  .body{ font-size:.92rem; line-height:1.55; color:var(--ink-2); }
+  .small{ font-size:.8rem; line-height:1.5; color:var(--ink-3); }
+  .hi{ color:var(--accent); font-weight:600; }
+  b,strong{ font-weight:700; color:var(--ink); }
+
+  /* 大数字 / 指标 */
+  .metric{ display:flex; flex-direction:column; gap:.15rem; }
+  .metric .n{ font-weight:800; font-size:2.5rem; line-height:.92; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .metric .n .u{ font-size:.95rem; font-weight:600; color:var(--ink-3); margin-left:.2rem; }
+  .metric .lab{ font-family:var(--mono); font-size:.7rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); }
+  .metric .note{ font-size:.78rem; color:var(--ink-3); line-height:1.4; }
+
+  /* 卡片：直角 hairline，无圆角无阴影 */
+  .card{ border:1px solid var(--line); padding:.85rem .95rem; display:flex; flex-direction:column; gap:.35rem; min-height:0; }
+  .card.fill{ background:var(--grey-bg); border-color:transparent; }
+  .card.accent{ background:var(--accent); border-color:transparent; color:var(--accent-ink); }
+  .card.accent .h-sec::before{ background:var(--accent-ink); }
+  .card.accent .body, .card.accent .small{ color:rgba(255,255,255,.85); }
+  .card .t{ font-weight:700; font-size:.95rem; }
+  .card .num-pre{ font-family:var(--mono); color:var(--accent); font-weight:700; }
+
+  /* 定义列表 / 键值 */
+  .kv{ display:grid; grid-template-columns:auto 1fr; gap:.4rem 1rem; font-size:.86rem; }
+  .kv dt{ font-family:var(--mono); color:var(--ink-3); font-size:.78rem; letter-spacing:.04em; white-space:nowrap; }
+  .kv dd{ color:var(--ink); }
+
+  /* 数据表：紧凑、hairline、斑马灰 */
+  table.tbl{ width:100%; border-collapse:collapse; font-size:.84rem; }
+  table.tbl th, table.tbl td{ text-align:left; padding:.42rem .6rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.tbl thead th{ font-family:var(--mono); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); border-bottom:2px solid var(--line-strong); }
+  table.tbl tbody tr:nth-child(even){ background:var(--grey-bg); }
+  table.tbl td.num{ font-variant-numeric:tabular-nums; }
+  table.tbl .mark{ color:var(--accent); font-weight:700; }
+
+  /* 代码 / 终端块 */
+  .code{ font-family:var(--mono); font-size:.78rem; line-height:1.5; background:var(--ink); color:#e8e8e8; padding:.75rem .9rem; overflow:hidden; white-space:pre; }
+  .page.dark .code{ background:#000; border:1px solid var(--dk-line); }
+  .code .c-key{ color:#7aa2ff } .code .c-str{ color:#9ece6a } .code .c-com{ color:#737373 } .code .c-fn{ color:#e0af68 }
+
+  /* 流程：横向带编号方块（纯静态，无箭头动效） */
+  .flow{ display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
+  .flow .step{ flex:1 1 0; min-width:7rem; border:1px solid var(--line); padding:.6rem .7rem; display:flex; flex-direction:column; gap:.25rem; }
+  .flow .step + .step{ border-left:none; }
+  .flow .step .s-n{ font-family:var(--mono); font-weight:700; color:var(--accent); font-size:.78rem; }
+  .flow .step .s-t{ font-weight:700; font-size:.88rem; }
+  .flow .step .s-d{ font-size:.76rem; color:var(--ink-3); line-height:1.4; }
+
+  /* 标注块 */
+  .callout{ border-left:3px solid var(--accent); background:var(--grey-bg); padding:.7rem .9rem; font-size:.86rem; line-height:1.5; }
+  .callout .lab{ font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:.2rem; }
+
+  /* hairline 分隔 */
+  .rule{ height:1px; background:var(--line); border:0; margin:0; }
+  .rule.strong{ height:2px; background:var(--line-strong); }
+
+  /* ===== 页脚 ===== */
+  .page-foot{ margin-top:auto; padding-top:.7rem; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); }
+
+  /* ===== Hero 封面 ===== */
+  .page.cover{ justify-content:center; }
+  .cover .c-kicker{ font-family:var(--mono); font-size:.85rem; letter-spacing:.24em; text-transform:uppercase; color:var(--accent); }
+  .cover h1{ font-weight:800; font-size:4.6rem; line-height:.98; letter-spacing:-.03em; margin:1.2rem 0 .8rem; max-width:20ch; }
+  .cover .c-sub{ font-size:1.15rem; color:var(--ink-2); line-height:1.5; max-width:60ch; }
+  .cover .c-meta{ margin-top:2.2rem; display:flex; gap:2.4rem; flex-wrap:wrap; font-family:var(--mono); font-size:.78rem; color:var(--ink-3); letter-spacing:.04em; }
+  .cover .c-meta b{ color:var(--ink); display:block; font-weight:700; margin-top:.2rem; }
+  .cover .c-bar{ width:5.5rem; height:.5rem; background:var(--accent); margin-bottom:0; }
+
+  /* ===== 右侧锚点索引（纯链接，无动效；hover 仅换色） ===== */
+  .pager{ position:fixed; top:50%; right:.9rem; transform:translateY(-50%); z-index:50;
+    display:flex; flex-direction:column; gap:.32rem; }
+  .pager a{ font-family:var(--mono); font-size:.66rem; color:var(--ink-4); text-decoration:none;
+    padding:.12rem .3rem; border-right:2px solid transparent; letter-spacing:.06em; }
+  .pager a:hover{ color:var(--ink); }
+  .pager a.active{ color:var(--accent); border-right-color:var(--accent); font-weight:700; }
+  @media print, (max-width:760px){ .pager{ display:none; } }
+
+  /* 键盘提示（右下，静态） */
+  .hint{ position:fixed; right:.9rem; bottom:.8rem; z-index:50; font-family:var(--mono);
+    font-size:.6rem; color:var(--ink-4); letter-spacing:.08em; }
+  @media (max-width:760px){ .hint{ display:none; } }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- ============================================================
+     PAGES_HERE  —  在此填充 ≤10 个 <section class="page" id="...">
+     每页必须带唯一语义 id（kebab-case），页眉显示 #id。
+     下面 3 页为可删除的示例（封面 / 内容页 / 收尾）。
+     ============================================================ -->
+
+<!-- 示例 1 · 封面 -->
+<section class="page cover" id="cover">
+  <div class="c-bar"></div>
+  <div class="c-kicker">Tech Deck · 2026</div>
+  <h1>[deck 主标题]</h1>
+  <p class="c-sub">[一句话说明这份 deck 讲什么、给谁看、解决什么问题]</p>
+  <div class="c-meta">
+    <div>作者<b>[name]</b></div>
+    <div>日期<b>2026-06</b></div>
+    <div>页数<b>≤10</b></div>
+    <div>导航<b>↑↓ / 数字键 / #锚点</b></div>
+  </div>
+  <div class="hint">↑↓ ←→ 翻页 · 1-9 跳页 · 点右侧锚点</div>
+</section>
+
+<!-- 示例 2 · 内容页（一页讲清一个模块）-->
+<section class="page" id="overview">
+  <header class="page-head">
+    <div class="ph-l"><span class="ph-num">02</span><span class="ph-title">架构总览</span></div>
+    <span class="ph-anchor">#<b>overview</b></span>
+  </header>
+  <p class="page-sub">[本页要讲清的那一个子问题，一句话。]</p>
+  <div class="page-body">
+    <div class="grid rows-fill">
+      <!-- 左：定义/要点 -->
+      <div class="c5" style="display:flex;flex-direction:column;gap:1rem">
+        <div class="h-sec">三层结构</div>
+        <dl class="kv">
+          <dt>CL</dt><dd>共识层 — 区块提议、验证者管理、最终性</dd>
+          <dt>DL</dt><dd>数据层 — Blob 数据、数据可用性采样 DAS</dd>
+          <dt>EL</dt><dd>执行层 — EVM 执行、状态管理、Gas 优化</dd>
+        </dl>
+        <div class="callout"><span class="lab">关键约束</span>每个模块只解决一类问题，跨层通过明确接口协作。</div>
+      </div>
+      <!-- 中：表格 -->
+      <div class="c4">
+        <div class="h-sec" style="margin-bottom:.6rem">对照</div>
+        <table class="tbl">
+          <thead><tr><th>层</th><th>职责</th><th class="num">指标</th></tr></thead>
+          <tbody>
+            <tr><td class="mark">CL</td><td>最终性</td><td class="num">秒级</td></tr>
+            <tr><td class="mark">DL</td><td>吞吐</td><td class="num">1GB/s</td></tr>
+            <tr><td class="mark">EL</td><td>执行</td><td class="num">10K TPS</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- 右：指标 + 代码 -->
+      <div class="c3" style="display:flex;flex-direction:column;gap:1rem">
+        <div class="metric"><span class="lab">目标</span><span class="n">9<span class="u">项</span></span><span class="note">分阶段交付</span></div>
+        <div class="code"><span class="c-com"># 接口约定</span>
+<span class="c-key">fn</span> <span class="c-fn">submit</span>(blob) -> Result</div>
+      </div>
+    </div>
+  </div>
+  <footer class="page-foot"><span>[DECK 缩写] · 架构</span><span>02 / 10</span></footer>
+</section>
+
+<!-- 示例 3 · 收尾页 -->
+<section class="page dark" id="summary">
+  <header class="page-head">
+    <div class="ph-l"><span class="ph-num">10</span><span class="ph-title">总结</span></div>
+    <span class="ph-anchor">#<b>summary</b></span>
+  </header>
+  <p class="page-sub">[一句话收束 + 下一步。]</p>
+  <div class="page-body">
+    <div class="grid rows-fill">
+      <div class="c4"><div class="card fill" style="height:100%"><div class="t">要点一</div><div class="small">……</div></div></div>
+      <div class="c4"><div class="card fill" style="height:100%"><div class="t">要点二</div><div class="small">……</div></div></div>
+      <div class="c4"><div class="card accent" style="height:100%"><div class="t">下一步</div><div class="small">……</div></div></div>
+    </div>
+  </div>
+  <footer class="page-foot"><span>[DECK 缩写] · 总结</span><span>10 / 10</span></footer>
+</section>
+
+</div><!-- /deck -->
+
+<!-- 锚点索引：每页一个，href 指向 section id。生成时按实际页同步增删。 -->
+<nav class="pager" aria-label="页索引">
+  <a href="#cover">01</a>
+  <a href="#overview">02</a>
+  <a href="#summary">10</a>
+</nav>
+
+<script>
+/* 仅做导航，零动画：scrollIntoView 用 behavior:auto（瞬切）。 */
+(function(){
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var links = Array.prototype.slice.call(document.querySelectorAll('.pager a'));
+  function go(i){ i=Math.max(0,Math.min(pages.length-1,i)); pages[i].scrollIntoView({behavior:'auto',block:'start'}); }
+  function current(){
+    var mid=window.innerHeight/2, best=0, bestd=Infinity;
+    pages.forEach(function(p,i){ var r=p.getBoundingClientRect(); var d=Math.abs(r.top); if(d<bestd){bestd=d;best=i;} });
+    return best;
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    if(['ArrowDown','ArrowRight','PageDown',' '].indexOf(e.key)>-1){ e.preventDefault(); go(current()+1); }
+    else if(['ArrowUp','ArrowLeft','PageUp'].indexOf(e.key)>-1){ e.preventDefault(); go(current()-1); }
+    else if(e.key==='Home'){ e.preventDefault(); go(0); }
+    else if(e.key==='End'){ e.preventDefault(); go(pages.length-1); }
+    else if(/^[1-9]$/.test(e.key)){ e.preventDefault(); go(parseInt(e.key,10)-1); }
+  });
+  /* 当前页高亮锚点索引（无动效，仅切 class） */
+  if('IntersectionObserver' in window){
+    var byId={}; links.forEach(function(a){ byId[a.getAttribute('href').slice(1)]=a; });
+    new IntersectionObserver(function(es){
+      es.forEach(function(en){ if(en.isIntersecting){ var a=byId[en.target.id];
+        if(a){ links.forEach(function(x){x.classList.remove('active');}); a.classList.add('active'); } } });
+    },{threshold:.55}).observe ? pages.forEach(function(p){ /* observe each */ }) : 0;
+  }
+})();
+/* 逐页 observe（拆出避免上面的三元误用） */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  var links={}; document.querySelectorAll('.pager a').forEach(function(a){ links[a.getAttribute('href').slice(1)]=a; });
+  var all=document.querySelectorAll('.pager a');
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(en){ if(en.isIntersecting && links[en.target.id]){
+      all.forEach(function(x){x.classList.remove('active');}); links[en.target.id].classList.add('active');
+    }});
+  },{threshold:.55});
+  document.querySelectorAll('.page').forEach(function(p){ io.observe(p); });
+})();
+</script>
+</body>
+</html>
