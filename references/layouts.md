@@ -1,29 +1,38 @@
-# 版式骨架（高密度 · 一页一模块）
+# 版式骨架（编辑式高密度 · 一页一焦点）
 
-核心原则：**一页讲清一个模块 / 子问题**，但这一页要**塞满有效信息**——用 12 列网格把「定义 / 表格 / 指标 / 代码 / 流程」并排组合，而不是一页只讲一句话。信息密度要**明显高于** guizang / frontend 那类"大字 + 留白"的 deck。
+核心：**一页讲清一个模块，但要饱满到 ~85% 高度**。靠「主-辅分区 + 视觉焦点 + 多条目支撑」做出高密度，**不是**把字缩小、把块挤在一起堆砌。
 
-所有页面共用结构：
+## 每页通用结构
 
 ```html
 <section class="page" id="语义id">
-  <header class="page-head">
-    <div class="ph-l"><span class="ph-num">02</span><span class="ph-title">页标题</span></div>
-    <span class="ph-anchor">#<b>语义id</b></span>
-  </header>
-  <p class="page-sub">本页讲清的那一个子问题（一句话）。</p>
-  <div class="page-body"><!-- 主体网格 --></div>
-  <footer class="page-foot"><span>DECK · 章节</span><span>02 / 10</span></footer>
+  <div class="page-head">
+    <div class="head-meta"><span class="kicker">栏目英文</span><span class="anchor">#<b>语义id</b></span></div>
+    <div class="head-title"><span class="num">02</span><h2>页标题</h2></div>
+    <div class="head-rule"></div>
+  </div>
+  <p class="page-lead">一句话点明本页讲清的那个子问题。</p>
+  <div class="page-body">
+    <div class="grid fill">
+      <div class="c5 col"><!-- 焦点区 --></div>
+      <div class="c7 col"><!-- 支撑区 --></div>
+    </div>
+  </div>
+  <div class="page-foot"><span>DECK · 章节</span><span>02 / 10</span></div>
 </section>
 ```
 
-- 每页 **必须有唯一 `id`**（kebab-case），页眉右侧显示 `#id`，并在底部 `.pager` 加一条 `<a href="#id">NN</a>`。
-- 主体放进 `.page-body > .grid.rows-fill`，用 `.cN` 分配 12 列宽。
-- 可用原子见 `template.html`：`kv`(定义列表) `tbl`(数据表) `metric`(指标大字) `card`(直角卡) `code`(代码块) `flow`(流程) `callout`(标注) `h-sec`(小节标题)。
+四条铁律（违反就退回"平铺堆砌"）：
+1. **标题醒目**：`page-head` = 大编号 `.num` + 大标题 `h2` + accent 粗线 `.head-rule`。
+2. **每页一个视觉焦点**：焦点区放 `.statement`(核心论点，关键词 `.hi` 高亮) 或 `.bignum`(超大数字)，抢眼。
+3. **主-辅分区**：焦点区(`.c5 .col`) + 支撑区(`.c7 .col`)。禁止 N 个等权小块平铺。
+4. **块间大间距 + 填充**：`.col` 内各块靠大 `gap` 分隔（已在模板设好）；支撑区用「多条目」(表格行 / 定义项 / 要点) 填到 ~85%。
+
+可用原子（定义见 `template.html`）：`.statement` `.bignum` `.h-sec` `.kv`(定义列表) `.tbl`(数据表) `.list`(要点) `.card` `.callout` `.code`。
 
 ---
 
 ## L1 · 封面 `cover`
-
 ```html
 <section class="page cover" id="cover">
   <div class="c-bar"></div>
@@ -34,103 +43,67 @@
 </section>
 ```
 
-## L2 · 模块剖析（左定义 + 中表格 + 右指标/代码）— 主力版式
-
-一页吃透一个模块：是什么 / 关键对照 / 量化指标 / 接口片段。
-
+## L2 · 焦点 + 支撑（主力版式）
+左焦点（论点 + 大数字 + callout），右支撑（定义列表 + 数据表）。一页吃透一个模块。
 ```html
-<div class="grid rows-fill">
-  <div class="c5" style="display:flex;flex-direction:column;gap:1rem">
-    <div class="h-sec">定义</div>
-    <dl class="kv"><dt>字段</dt><dd>说明……</dd> …… </dl>
+<div class="grid fill">
+  <div class="c5 col">
+    <p class="statement">核心论点，<span class="hi">关键词高亮</span>。</p>
+    <div class="bignum accent"><span class="lab">关键指标</span><span class="n">10<span class="u">K TPS</span></span><span class="note">注解</span></div>
     <div class="callout"><span class="lab">关键约束</span>……</div>
   </div>
-  <div class="c4">
-    <div class="h-sec" style="margin-bottom:.6rem">对照</div>
-    <table class="tbl"><thead><tr><th>维度</th><th>A</th><th class="num">值</th></tr></thead>
-      <tbody><tr><td class="mark">…</td><td>…</td><td class="num">…</td></tr></tbody></table>
-  </div>
-  <div class="c3" style="display:flex;flex-direction:column;gap:1rem">
-    <div class="metric"><span class="lab">指标</span><span class="n">9<span class="u">项</span></span></div>
-    <div class="code"><span class="c-com"># 接口</span>
-<span class="c-key">fn</span> <span class="c-fn">call</span>() -> T</div>
+  <div class="c7 col">
+    <div><div class="h-sec">定义</div><dl class="kv" style="margin-top:.6rem"><dt>X</dt><dd>……</dd></dl></div>
+    <div><div class="h-sec">数据</div><table class="tbl" style="margin-top:.6rem">……（4–6 行）</table></div>
   </div>
 </div>
 ```
 
-## L3 · 全宽对照表
-
-多维度横向对比（5–10 行最佳）。表格占满，左侧或上方留要点。
-
+## L3 · 表格主体（表是焦点）
+对照 / 区间 / 排名类。主体放大表(`c8`)，辅区(`c4`)放焦点数字 + 读表要点。
 ```html
-<div class="grid rows-fill">
-  <div class="c8">
-    <table class="tbl">
-      <thead><tr><th>方案</th><th>机制</th><th class="num">吞吐</th><th class="num">延迟</th><th>权衡</th></tr></thead>
-      <tbody><tr><td class="mark">X</td><td>…</td><td class="num">…</td><td class="num">…</td><td>…</td></tr></tbody>
-    </table>
-  </div>
-  <div class="c4" style="display:flex;flex-direction:column;gap:1rem">
-    <div class="h-sec">读表要点</div>
-    <ul class="body" style="padding-left:1.1em;line-height:1.7"><li>…</li><li>…</li></ul>
-    <div class="callout"><span class="lab">结论</span>……</div>
+<div class="grid fill">
+  <div class="c8 col"><table class="tbl">……（多列多行）</table><div class="callout"><span class="lab">读表要点</span>……</div></div>
+  <div class="c4 col">
+    <div class="bignum accent"><span class="lab">当前</span><span class="n">$665</span></div>
+    <ul class="list"><li>……</li><li>……</li></ul>
   </div>
 </div>
 ```
 
-## L4 · 流程 / 管线（横向编号步骤）
-
+## L4 · 指标墙
+3–4 个大数字并排 + 下方一张表/一组要点解释这些数字（别让大数字页空着）。
 ```html
-<div class="page-body" style="justify-content:center">
-  <div class="flow">
-    <div class="step"><span class="s-n">01</span><span class="s-t">阶段</span><span class="s-d">说明……</span></div>
-    <div class="step"><span class="s-n">02</span><span class="s-t">阶段</span><span class="s-d">说明……</span></div>
-    <!-- 3–6 步 -->
+<div class="grid fill">
+  <div class="c3"><div class="bignum"><span class="lab">市值</span><span class="n">$11<span class="u">B</span></span></div></div>
+  <!-- ×3–4，再接 c12 一张表或要点 -->
+</div>
+```
+
+## L5 · 双栏对比（旧 vs 新 / A vs B）
+```html
+<div class="grid fill">
+  <div class="c6"><div class="card" style="height:100%"><div class="t">A</div><dl class="kv">……</dl></div></div>
+  <div class="c6"><div class="card accent" style="height:100%"><div class="t">B</div><dl class="kv">……</dl></div></div>
+</div>
+```
+
+## L6 · 总结 / 下一步
+焦点=结论金句 `.statement`；支撑=要点卡 + 关键日历表。
+```html
+<div class="grid fill">
+  <div class="c5 col"><p class="statement">结论金句。</p><div class="bignum"><span class="lab">建议仓位</span><span class="n">5–10<span class="u">%</span></span></div></div>
+  <div class="c7 col">
+    <div class="grid"><div class="c6"><div class="card fill">入场……</div></div><div class="c6"><div class="card accent">必盯……</div></div></div>
+    <div><div class="h-sec">催化剂日历</div><table class="tbl">……</table></div>
   </div>
-  <div class="grid" style="margin-top:1.4rem">
-    <div class="c4"><div class="callout"><span class="lab">硬依赖</span>A → B → C</div></div>
-    <div class="c4"><div class="callout"><span class="lab">失败处理</span>……</div></div>
-    <div class="c4"><div class="metric"><span class="lab">端到端</span><span class="n">2<span class="u">s</span></span></div></div>
-  </div>
-</div>
-```
-
-## L5 · 指标墙（多个大数字 + 注解）
-
-```html
-<div class="grid rows-fill" style="align-content:center">
-  <div class="c3"><div class="metric"><span class="lab">TPS</span><span class="n">10<span class="u">K</span></span><span class="note">目标值</span></div></div>
-  <div class="c3"><div class="metric"><span class="lab">最终性</span><span class="n">12<span class="u">s</span></span><span class="note">现状</span></div></div>
-  <!-- 4 个一行；下方可接一行表格或要点解释这些数字 -->
-  <div class="c12"><hr class="rule"></div>
-  <div class="c12"><p class="small">数字口径与来源……（信息密度：别让大数字页空着，补一行注解/表格）</p></div>
-</div>
-```
-
-## L6 · 双栏对比（旧 vs 新 / A vs B）
-
-```html
-<div class="grid rows-fill">
-  <div class="c6"><div class="card" style="height:100%"><div class="t">旧模式</div><dl class="kv">……</dl><div class="small">问题：……</div></div></div>
-  <div class="c6"><div class="card accent" style="height:100%"><div class="t">新模式</div><dl class="kv">……</dl><div class="small">收益：……</div></div></div>
-</div>
-```
-
-## L7 · 总结 / 下一步
-
-```html
-<div class="grid rows-fill">
-  <div class="c4"><div class="card fill" style="height:100%"><div class="t">要点一</div><div class="small">…</div></div></div>
-  <div class="c4"><div class="card fill" style="height:100%"><div class="t">要点二</div><div class="small">…</div></div></div>
-  <div class="c4"><div class="card accent" style="height:100%"><div class="t">下一步</div><div class="small">…</div></div></div>
 </div>
 ```
 
 ---
 
-## 密度与节奏规则
-
-- **页数 ≤ 10**（硬约束）。封面 + 收尾各 1 页，中间 ≤ 8 页，每页一个模块。
-- **每页尽量塞 2–4 个信息块**（定义 + 表格 + 指标/代码并排）。单块独占一页 = 密度不足，合并或加料。
-- **dark 页节奏**：用 `.page.dark` 制造呼吸，但连续同色不超过 2 页；纯 light 也别一镜到底。
-- **绝不溢出**：每页 `overflow:hidden`，超出即被裁。写完**必须跑 SKILL.md 的 headless 溢出检测**，三视口全 `ALL_OK` 才算完成。塞不下就精简文案 / 降一档字号，不要硬塞。
+## 节奏与硬约束
+- **≤10 页**：封面 + ≤8 内容 + 收尾，一页一模块。
+- **dark 节奏**：`.page.dark` 制造呼吸，连续同色不超 2 页。
+- **填充 ~85%**，下半不留大块空白；但不注水——内容用真实数据/论据。
+- **绝不溢出**：写完跑 `scripts/check-overflow.sh deck.html`，三视口全 `ALL_OK` 才算完成。塞不下就精简文案 / 收紧"标题到表"的小间距（不是收紧块间大间距），或拆页。
