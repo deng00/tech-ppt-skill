@@ -7,9 +7,10 @@
 - **全程等宽字体**（Ubuntu Mono + 等宽 CJK 回退）—— 工程感、数字对齐、代码原生
 - **信息密度优先、设计克制** —— 12 列网格塞满表格 / 定义列表 / 指标 / 代码，不靠装饰
 - **零动效、可快速连续翻页** —— 原生 scroll-snap 瞬切，不卡
-- **页数 ≤ 10**，一页一个模块 / 子问题
+- **页数 ≤ 16**，一页一个模块 / 子问题
 - **每页 `#anchor`** —— URL 直达任意页，右侧锚点索引
 - **4 套主题**：IKB 蓝 / 安全橙 / 暗终端 / 墨黑（只换配色，不换字体/排版）
+- **按需图解** —— mermaid 经 [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) **预渲染为静态内联 SVG**，自动适配主题/暗页，仍单文件 / 离线 / 零运行时
 - **headless 溢出检测质量门** —— 交付前必须三视口全绿
 
 ## 用法
@@ -19,7 +20,8 @@
 ```bash
 cp assets/template.html deck.html          # 1. 拷贝模板
 # 2. 从 references/themes.md 选一套主题，替换 :root
-# 3. 按 references/layouts.md 填 ≤10 页，每页一个 id
+# 3. 按 references/layouts.md 填 ≤16 页，每页一个 id
+# 3b.（按需）画图：node scripts/mermaid-svg.mjs flow.mmd -o flow.svg → 粘进 .diagram（见 references/diagrams.md）
 scripts/check-overflow.sh deck.html         # 4. 溢出检测，必须全 ALL_OK
 # 5. 对照 references/checklist.md 自检
 ```
@@ -28,9 +30,12 @@ scripts/check-overflow.sh deck.html         # 4. 溢出检测，必须全 ALL_OK
 
 ```
 SKILL.md                  主指令
-assets/template.html      种子模板（等宽/零动效/锚点导航，完整可运行）
+package.json              beautiful-mermaid 依赖（画图用；node_modules 已 gitignore）
+assets/template.html      种子模板（等宽/零动效/锚点导航/图解容器，完整可运行）
 references/themes.md      4 套视觉基调
-references/layouts.md     高密度版式骨架 L1–L7
+references/layouts.md     高密度版式骨架 L1–L7（L7 = 图解页）
+references/diagrams.md    何时/如何画图（mermaid → 预渲染内联 SVG）
 references/checklist.md   交付前自检
 scripts/check-overflow.sh headless 溢出检测
+scripts/mermaid-svg.mjs   mermaid → 干净内联 SVG（beautiful-mermaid）
 ```

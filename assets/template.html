@@ -23,13 +23,6 @@
     --line-strong:#0a0a0a;
     --grey-bg:#f5f5f3;
 
-    --dk-paper:#0c0c0d;
-    --dk-ink:#f2f2f2;
-    --dk-ink-2:#c8c8c8;
-    --dk-ink-3:#8f8f8f;
-    --dk-line:#2a2a2c;
-    --dk-grey-bg:#17171a;
-
     /* 全程等宽（技术风强制）。任何主题都不改这两个变量 */
     --mono:"Ubuntu Mono","JetBrains Mono","SF Mono","Sarasa Mono SC","Noto Sans Mono CJK SC","Noto Sans SC","PingFang SC","Microsoft YaHei",ui-monospace,monospace;
     --sans:var(--mono);
@@ -68,11 +61,8 @@
     display:flex; flex-direction:column;
     background:var(--paper); color:var(--ink);
   }
-  .page.dark{
-    background:var(--dk-paper); color:var(--dk-ink);
-    --ink:var(--dk-ink); --ink-2:var(--dk-ink-2); --ink-3:var(--dk-ink-3);
-    --line:var(--dk-line); --line-strong:var(--dk-ink); --grey-bg:var(--dk-grey-bg);
-  }
+  /* 背景由所选主题统一决定（:root 的 --paper/--ink）：整份 deck 要么全浅、要么全深，
+     不逐页混用。切到深色背景见 references/themes.md「暗终端」。 */
 
   /* ===== 页头：醒目 —— kicker + 大编号 + 大标题 + accent 粗线 ===== */
   .page-head{ flex:0 0 auto; }
@@ -145,9 +135,30 @@
   .callout .lab{ font-family:var(--mono); font-size:var(--fs-label); letter-spacing:.12em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:.35rem; }
 
   /* 代码 / 终端 */
-  .code{ font-family:var(--mono); font-size:var(--fs-small); line-height:1.55; background:var(--ink); color:#e8e8e8; padding:.9rem 1rem; overflow:hidden; white-space:pre; }
-  .page.dark .code{ background:#000; border:1px solid var(--dk-line); }
+  .code{ font-family:var(--mono); font-size:var(--fs-small); line-height:1.55; background:#0a0a0a; color:#e8e8e8; border:1px solid var(--line); padding:.9rem 1rem; overflow:hidden; white-space:pre; }
   .code .k{ color:#7aa2ff } .code .s{ color:#9ece6a } .code .c{ color:#6b6b6b } .code .f{ color:#e0af68 }
+
+  /* 图解：mermaid 预渲染为内联 SVG（见 references/diagrams.md）。
+     静态、零运行时、离线可用；SVG 已映射到 --paper/--ink/--accent，随所选主题（全局浅/深背景）自动着色。
+     SVG 高度由 --dia-h 硬上限约束（相对视口、等比缩放），不依赖外层高度链，绝不撑破页面。
+     若某页内容多导致仍溢出，调小本页 --dia-h（如 style="--dia-h:48vh"）即可。 */
+  .diagram{ min-height:0; display:flex; align-items:center; justify-content:center; }
+  .diagram svg{ max-width:100%; max-height:var(--dia-h, 58vh); width:auto; height:auto; }
+  .diagram.framed{ border:1px solid var(--line); background:var(--grey-bg); padding:1.1rem; }
+  .dia-cap{ font-size:var(--fs-small); color:var(--ink-3); margin-top:.6rem; text-align:center; }
+
+  /* 步骤 / 流程带：横向(默认 · 编号在上 · step 间 → 箭头) 或纵向(.col · 编号在左)。
+     用于「流程 / 演进 / 阶段 / 编号清单 / 设计原则」，骨架与左右分栏明显不同，打破版面雷同。 */
+  .steps{ display:flex; gap:1.1rem; }
+  .steps.col{ flex-direction:column; gap:.9rem; }
+  .step{ flex:1; min-width:0; position:relative; border:1px solid var(--line); padding:1rem 1.1rem; display:flex; gap:.7rem; }
+  .steps:not(.col) .step{ flex-direction:column; }
+  .steps.col .step{ flex-direction:row; align-items:baseline; }
+  .step .sn{ font-family:var(--mono); font-weight:700; line-height:1; color:var(--accent); font-size:clamp(1.3rem,1.9vw,1.9rem); flex:0 0 auto; }
+  .step .sb{ display:flex; flex-direction:column; gap:.3rem; min-width:0; }
+  .step .st{ font-weight:700; font-size:var(--fs-body); }
+  .step .sd{ font-size:var(--fs-small); color:var(--ink-3); line-height:1.5; }
+  .steps:not(.col) .step:not(:last-child)::after{ content:"→"; position:absolute; right:-.95rem; top:1.4rem; color:var(--ink-4); font-weight:700; }
 
   /* hairline */
   .rule{ height:1px; background:var(--line); border:0; }
@@ -181,7 +192,7 @@
 <div class="deck">
 
 <!-- ============================================================
-     PAGES_HERE — ≤10 个 <section class="page" id="...">
+     PAGES_HERE — ≤16 个 <section class="page" id="...">
      设计法则（务必遵守，否则会退回"平铺堆砌"）：
        1. 每页一个视觉焦点：一个大数字(.bignum) 或 一句核心论点(.statement)。
        2. 主-辅分区：焦点区(左/上, 4–5 列) + 支撑数据区(右/下, 7–8 列)。不要 N 个等权小块平铺。
@@ -200,7 +211,7 @@
   <div class="c-meta">
     <div>作者<b>[name]</b></div>
     <div>日期<b>2026-06</b></div>
-    <div>页数<b>≤10</b></div>
+    <div>页数<b>≤16</b></div>
     <div>导航<b>↑↓ / 1-9 / #锚点</b></div>
   </div>
   <div class="hint">↑↓ ←→ 翻页 · 1-9 跳页 · 右侧锚点</div>
@@ -246,14 +257,14 @@
       </div>
     </div>
   </div>
-  <div class="page-foot"><span>DECK · 架构</span><span>02 / 10</span></div>
+  <div class="page-foot"><span>DECK · 架构</span><span>02 / 16</span></div>
 </section>
 
 <!-- 示例 3 · 收尾页 -->
-<section class="page dark" id="summary">
+<section class="page" id="summary">
   <div class="page-head">
     <div class="head-meta"><span class="kicker">Summary</span><span class="anchor">#<b>summary</b></span></div>
-    <div class="head-title"><span class="num">10</span><h2>总结</h2></div>
+    <div class="head-title"><span class="num">16</span><h2>总结</h2></div>
     <div class="head-rule"></div>
   </div>
   <p class="page-lead">一句话收束 + 指向下一步。</p>
@@ -264,7 +275,7 @@
       <div class="c4"><div class="card accent" style="height:100%"><div class="t">下一步</div><div class="small">行动建议……</div></div></div>
     </div>
   </div>
-  <div class="page-foot"><span>DECK · 总结</span><span>10 / 10</span></div>
+  <div class="page-foot"><span>DECK · 总结</span><span>16 / 16</span></div>
 </section>
 
 </div><!-- /deck -->
@@ -272,7 +283,7 @@
 <nav class="pager" aria-label="页索引">
   <a href="#cover">01</a>
   <a href="#overview">02</a>
-  <a href="#summary">10</a>
+  <a href="#summary">16</a>
 </nav>
 
 <script>

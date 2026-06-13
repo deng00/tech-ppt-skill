@@ -1,0 +1,11 @@
+{
+  "name": "tech-ppt-skill",
+  "version": "1.0.0",
+  "private": true,
+  "description": "高信息密度技术风单文件 HTML deck skill（含 mermaid → 内联 SVG 渲染脚本）",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "beautiful-mermaid": "^1.1.3"
+  }
+}
